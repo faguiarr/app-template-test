@@ -8,22 +8,22 @@ import { useBroadcastChannel } from "../broadcastChannelContext/broadcastChannel
 export const AppConfigProvider = ({ children }: PropsWithChildren) => {
     const [appEnvironmentVar, setAppEnvironmentVar] = useState<DefaultObject | null>(null);
 
-    const devEnvConfig = useMemo<Record<string, any> | null>(() => {
-        if (import.meta.env.DEV) {
-            const raw = import.meta.env.VITE_APP_CONFIG as string | undefined;
-            if (!raw) {
-                console.warn("Missing VITE_APP_CONFIG");
-                return null;
-            }
-
+    const [devEnvConfig, setDevEnvConfig] = useState<Record<string, any> | null>(null);
+    useEffect(() => {
+        if (!import.meta.env.DEV) return;
+        (async () => {
             try {
-                return JSON.parse(raw);
+                const res = await fetch("/app-config.dev.json", { cache: "no-store" });
+                if (res.ok) {
+                    const json = await res.json();
+                    setDevEnvConfig(json);
+                } else {
+                    console.warn("app-config.dev.json não encontrado ou inválido");
+                }
             } catch (e) {
-                console.error("Invalid VITE_APP_CONFIG value:", e);
-                return null;
+                console.warn("Falha ao carregar app-config.dev.json:", e);
             }
-        }
-        return null;
+        })();
     }, []);
 
     const value: AppConfigContextType = useMemo(() => {
@@ -44,7 +44,7 @@ export const AppConfigProvider = ({ children }: PropsWithChildren) => {
 
         return appConfig;
 
-    }, [appEnvironmentVar]);
+    }, [appEnvironmentVar, devEnvConfig]);
 
     const { subscribe, post } = useBroadcastChannel();
 

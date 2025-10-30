@@ -16,11 +16,11 @@ export const datastoreToObject = <T extends Record<string, Cell>>(headers: strin
     return result;
 }
 
-export const objectToDatastore = <T extends Record<string, Cell>>(data: T[]): Datastore => {
-    const headers: Cell[] = Object.keys(data?.[0] ?? {});
+export const objectToDatastore = <T extends Record<string, Cell>>(headers: string[], data: T[]): Datastore => {
+    // const headers: Cell[] = Object.keys(data?.[0] ?? {});
 
     const rows: Datastore = data.map((d) =>
-        headers.map<Cell>((h) => d[h as string] ?? null)
+        headers.map((h) => d[h] ?? null)
     );
 
     return [
