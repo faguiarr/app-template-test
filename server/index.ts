@@ -1,14 +1,9 @@
-// proxy.ts
-// import path from 'node:path';
-// import dotenv from 'dotenv';
 import express, { Request, Response, NextFunction } from 'express';
 import type { ClientRequest, IncomingMessage } from 'http';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 
-// dotenv.config({ path: path.join(process.env.PROJECT_ROOT ?? '', '.env') });
-
 const PORT = 3200;
-const TARGET = process.env.PROXY_SERVER_TARGET_URL;
+const TARGET = process.env.APP_TEMPLATE_SERVER_TARGET_URL;
 
 if (!TARGET) {
   throw new Error('PROXY_SERVER_TARGET_URL must be set.');
@@ -17,8 +12,8 @@ if (!TARGET) {
 const app = express();
 
 const onProxyReq = (proxyReq: ClientRequest, req: Request, _res: Response) => {
-  const ACCOUNT_SID = process.env.ACCOUNT_SID;
-  const AUTH_TOKEN = process.env.AUTH_TOKEN;
+  const ACCOUNT_SID = process.env.APP_TEMPLATE_ACCOUNT_SID;
+  const AUTH_TOKEN = process.env.APP_TEMPLATE_AUTH_TOKEN;
 
   proxyReq.removeHeader('origin');
   proxyReq.removeHeader('referer');
