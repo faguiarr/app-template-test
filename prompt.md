@@ -125,6 +125,44 @@ Any action sent or received must follow this structure.
 
 ---
 
+### Using React Query and Axios Together
+
+All data fetching in the app should use **React Query** in combination with the custom **useAxios** hook.
+This ensures caching, automatic refetching, and consistent request handling.
+
+Preferred pattern example (Datastores):
+
+```ts
+import { useQuery } from '@tanstack/react-query';
+import useAxios from '../hooks/useAxios';
+import { useAppConfig } from '../contexts/appConfigContext/provider';
+import { getDatastores } from '../services/datastores';
+
+export function useDatastoresQuery() {
+  const { api } = useAxios();
+  const { appEnvironmentVar } = useAppConfig();
+  const workspace = appEnvironmentVar?.workspaces?.metrics; // read from AppConfig
+
+  const {
+    data: datastores = [],
+    isLoading: loading,
+    error,
+  } = useQuery({
+    queryKey: ['datastores', workspace],
+    queryFn: () => getDatastores(api, undefined, workspace, undefined, false),
+    enabled: !!workspace,
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  return { datastores, loading, error };
+}
+```
+
+Use this same approach for all requests: **React Query** for data management and caching, and **useAxios** for consistent API configuration. Never hardcode workspaces or other parameters; always read them from `AppConfigContext`.
+
+---
+
 ### Accessing Config In Code (Examples)
 
 Use `useAppConfig()` to read dynamic values from `AppConfigContext`. Do not import JSON directly.
